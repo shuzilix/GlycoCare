@@ -4,18 +4,13 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { Spacing } from '@/constants/theme';
+import { Palette, Spacing } from '@/constants/theme';
 import { useFoodLog } from '@/context/FoodLogContext';
 import { useUserProfile } from '@/context/UserProfileContext';
+import { localDateStr } from '@/utils/food';
 
 const BAR_GREEN = '#4caf50';
 const BAR_AMBER = '#f5a623';
-const BAR_RED = '#e53935';
-
-function localDateStr(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 export function DailyCarbSummary() {
   const { entries } = useFoodLog();
@@ -35,7 +30,7 @@ export function DailyCarbSummary() {
   const isOver = consumed >= limit;
   const remaining = Math.round((limit - consumed) * 10) / 10;
   const over = Math.round((consumed - limit) * 10) / 10;
-  const color = ratio >= 1 ? BAR_RED : ratio >= 0.75 ? BAR_AMBER : BAR_GREEN;
+  const color = ratio >= 1 ? Palette.danger : ratio >= 0.75 ? BAR_AMBER : BAR_GREEN;
 
   return (
     <ThemedView type="backgroundElement" style={styles.card}>
@@ -89,6 +84,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overText: {
-    color: BAR_RED,
+    color: Palette.danger,
   },
 });

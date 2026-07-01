@@ -8,7 +8,7 @@ import { copy } from '@/constants/copy';
 import { useUserProfile } from '@/context/UserProfileContext';
 import { MaxContentWidth, Palette, Spacing } from '@/constants/theme';
 
-export default function ProfileTabScreen() {
+export default function ProfileScreen() {
   const { profile } = useUserProfile();
 
   if (!profile) return null;
@@ -52,6 +52,14 @@ export default function ProfileTabScreen() {
               onPress={() => router.push('/onboarding')}>
               <ThemedText type="default" style={styles.buttonLabel}>
                 Change settings
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+              onPress={() => router.back()}>
+              <ThemedText type="default" themeColor="textSecondary">
+                Back
               </ThemedText>
             </Pressable>
           </ThemedView>
@@ -103,6 +111,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     alignItems: 'center',
     marginTop: Spacing.two,
+  },
+  secondaryButton: {
+    borderRadius: Spacing.four,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
   },
   buttonLabel: {
     color: Palette.primaryText,

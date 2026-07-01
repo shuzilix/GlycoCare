@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,14 +7,6 @@ import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 
 export default function TrackerScreen() {
-  const [refreshing, setRefreshing] = useState(false);
-
-  async function onRefresh() {
-    setRefreshing(true);
-    await Promise.resolve();
-    setRefreshing(false);
-  }
-
   const header = (
     <ThemedView style={styles.summaryWrapper}>
       <DailyCarbSummary />
@@ -25,7 +16,7 @@ export default function TrackerScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <DailyFoodLog listHeader={header} refreshing={refreshing} onRefresh={onRefresh} />
+        <DailyFoodLog listHeader={header} />
       </SafeAreaView>
     </ThemedView>
   );

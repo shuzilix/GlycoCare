@@ -7,10 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { Spacing } from '@/constants/theme';
+import { Palette, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const BARCODE_TYPES = ['ean13', 'ean8', 'upc_e'] as const;
+const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e'] as const;
 
 export default function ScanScreen() {
   const theme = useTheme();
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: Spacing.four,
     paddingVertical: Spacing.three,
     paddingHorizontal: Spacing.five,

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { FoodItem, FoodLogEntry } from '@/types/FoodLog';
+import { calcNetCarbs } from '@/utils/food';
 
 const STORAGE_KEY = '@glycocare_food_log';
 
@@ -19,35 +20,41 @@ export function FoodLogProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw) setEntries(JSON.parse(raw));
-      setLoading(false);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((raw) => {
+        if (raw) setEntries(JSON.parse(raw));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   async function addEntry(food: FoodItem, quantity: number) {
     const servingSizeG = food.servingSizeG ?? 100;
     const servingSizeEstimated = food.servingSizeG == null;
-    const totalNetCarbsG =
-      Math.round(((food.carbsPer100g / 100) * servingSizeG * quantity) * 10) / 10;
+    const totalNetCarbsG = calcNetCarbs(food.carbsPer100g, servingSizeG, quantity);
 
     const entry: FoodLogEntry = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       timestamp: Date.now(),
       food,
       quantity,
       totalNetCarbsG,
       servingSizeEstimated,
     };
-    const next = [...entries, entry];
-    setEntries(next);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+    setEntries((prev) => {
+      const next = [...prev, entry];
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }
 
   async function removeEntry(id: string) {
-    const next = entries.filter((e) => e.id !== id);
-    setEntries(next);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setEntries((prev) => {
+      const next = prev.filter((e) => e.id !== id);
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }
 
   return (

@@ -7,7 +7,7 @@ import { ProgressDots } from '@/components/progress-dots';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Palette, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { DiabetesType } from '@/types/UserProfile';
 
@@ -70,7 +70,7 @@ export default function OnboardingCarbLimit() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ProgressDots total={4} current={2} />
+        <ProgressDots total={3} current={1} />
 
         <ThemedView style={styles.content}>
           <ThemedText type="subtitle" style={styles.title}>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: THUMB_SIZE / 2,
     height: 4,
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: 2,
   },
   sliderThumb: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderWidth: 2,
   },
   rangeRow: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: Spacing.four,
     paddingVertical: Spacing.three,
     alignItems: 'center',
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   buttonLabel: {
-    color: '#ffffff',
+    color: Palette.primaryText,
     fontWeight: '600',
   },
 });

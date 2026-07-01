@@ -26,9 +26,9 @@ export async function searchFoodByName(query: string): Promise<FoodItem[]> {
       return {
         barcode: (p.code as string) ?? '',
         name: p.product_name as string,
-        brand: (p.brands as string | undefined) || undefined,
+        brand: (p.brands as string) || undefined,
         carbsPer100g: Math.round((nutriments.carbohydrates_100g ?? 0) * 10) / 10,
-        servingSizeG: (p.serving_quantity as number | undefined) ?? undefined,
+        servingSizeG: typeof p.serving_quantity === 'number' ? p.serving_quantity : undefined,
       };
     });
 }

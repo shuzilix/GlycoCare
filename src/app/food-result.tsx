@@ -8,8 +8,9 @@ import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
 import { useFoodLog } from '@/context/FoodLogContext';
 import { useUserProfile } from '@/context/UserProfileContext';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Palette, Spacing } from '@/constants/theme';
 import { FoodItem } from '@/types/FoodLog';
+import { calcNetCarbs, localDateStr } from '@/utils/food';
 
 const MIN_QTY = 0.5;
 const MAX_QTY = 10;
@@ -21,64 +22,67 @@ type ScreenState =
   | { status: 'not_found' }
   | { status: 'error' };
 
-function calcNetCarbs(food: FoodItem, qty: number) {
-  const sizeG = food.servingSizeG ?? 100;
-  return Math.round(((food.carbsPer100g / 100) * sizeG * qty) * 10) / 10;
-}
-
 export default function FoodResultScreen() {
   const { barcode, foodItem: foodItemParam } = useLocalSearchParams<{
     barcode?: string;
     foodItem?: string;
   }>();
-  const { addEntry } = useFoodLog();
+  const { addEntry, entries } = useFoodLog();
   const { profile } = useUserProfile();
   const [state, setState] = useState<ScreenState>({ status: 'loading' });
   const [quantity, setQuantity] = useState(1);
 
-  async function fetchProduct() {
-    if (!barcode) { setState({ status: 'not_found' }); return; }
-    setState({ status: 'loading' });
-    try {
-      const res = await fetch(
-        `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
-      );
-      const json = await res.json();
-
-      if (json.status !== 1 || !json.product?.nutriments) {
-        setState({ status: 'not_found' });
-        return;
-      }
-
-      const p = json.product;
-      const carbsPer100g = p.nutriments['carbohydrates_100g'] ?? p.nutriments['carbohydrates'];
-
-      if (carbsPer100g == null) {
-        setState({ status: 'not_found' });
-        return;
-      }
-
-      const food: FoodItem = {
-        barcode,
-        name: p.product_name || p.product_name_en || 'Unknown product',
-        brand: p.brands || undefined,
-        carbsPer100g: Math.round(carbsPer100g * 10) / 10,
-        servingSizeG: p.serving_quantity ?? undefined,
-      };
-
-      setState({ status: 'found', food });
-    } catch {
-      setState({ status: 'error' });
-    }
-  }
-
   useEffect(() => {
     setQuantity(1);
+
     if (foodItemParam) {
       setState({ status: 'found', food: JSON.parse(foodItemParam) as FoodItem });
-    } else {
-      fetchProduct();
+      return;
     }
+
+    if (!barcode) {
+      setState({ status: 'not_found' });
+      return;
+    }
+
+    let cancelled = false;
+    setState({ status: 'loading' });
+
+    fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+
+        if (json.status !== 1 || !json.product?.nutriments) {
+          setState({ status: 'not_found' });
+          return;
+        }
+
+        const p = json.product;
+        const carbsPer100g = p.nutriments['carbohydrates_100g'] ?? p.nutriments['carbohydrates'];
+
+        if (carbsPer100g == null) {
+          setState({ status: 'not_found' });
+          return;
+        }
+
+        const food: FoodItem = {
+          barcode,
+          name: p.product_name || p.product_name_en || 'Unknown product',
+          brand: p.brands || undefined,
+          carbsPer100g: Math.round(carbsPer100g * 10) / 10,
+          servingSizeG: p.serving_quantity ?? undefined,
+        };
+
+        setState({ status: 'found', food });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ status: 'error' });
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [barcode, foodItemParam]);
 
   function handleLog() {
@@ -94,8 +98,22 @@ export default function FoodResultScreen() {
     });
   }
 
-  const dailyLogged = profile?.dailyCarbLimitG;
-  const totalNetCarbsG = state.status === 'found' ? calcNetCarbs(state.food, quantity) : 0;
+  const limit = profile?.dailyCarbLimitG;
+  const today = localDateStr(Date.now());
+  const consumedToday = entries
+    .filter((e) => localDateStr(e.timestamp) === today)
+    .reduce((sum, e) => sum + e.totalNetCarbsG, 0);
+  const remainingToday =
+    limit != null ? Math.round((limit - consumedToday) * 10) / 10 : null;
+
+  const totalNetCarbsG =
+    state.status === 'found'
+      ? calcNetCarbs(
+          state.food.carbsPer100g,
+          state.food.servingSizeG ?? 100,
+          quantity
+        )
+      : 0;
   const servingSizeEstimated = state.status === 'found' && state.food.servingSizeG == null;
   const servingLabel =
     quantity === 1 ? copy.foodResult.servingSingular : copy.foodResult.servingPlural;
@@ -105,7 +123,7 @@ export default function FoodResultScreen() {
       <SafeAreaView style={styles.safeArea}>
         {state.status === 'loading' && (
           <ThemedView style={styles.centered}>
-            <ActivityIndicator size="large" color="#3c87f7" />
+            <ActivityIndicator size="large" color={Palette.primary} />
             <ThemedText type="default" themeColor="textSecondary">
               {copy.foodResult.loading}
             </ThemedText>
@@ -151,7 +169,7 @@ export default function FoodResultScreen() {
                   </>
                 )}
 
-                {dailyLogged != null && (
+                {remainingToday != null && (
                   <>
                     <ThemedView type="backgroundSelected" style={styles.divider} />
                     <ThemedView type="backgroundElement" style={styles.cardRow}>
@@ -159,7 +177,7 @@ export default function FoodResultScreen() {
                         {copy.foodResult.dailyRemainingLabel}
                       </ThemedText>
                       <ThemedText type="default" style={styles.cardValue}>
-                        {dailyLogged}g limit
+                        {remainingToday}g
                       </ThemedText>
                     </ThemedView>
                   </>
@@ -183,7 +201,7 @@ export default function FoodResultScreen() {
             </ThemedText>
             <Pressable
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={state.status === 'not_found' ? router.back : fetchProduct}>
+              onPress={state.status === 'not_found' ? router.back : () => router.back()}>
               <ThemedText type="default">
                 {state.status === 'not_found'
                   ? copy.foodResult.scanAgainCta
@@ -339,7 +357,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.one,
   },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: Spacing.four,
     paddingVertical: Spacing.three,
     alignItems: 'center',
@@ -353,7 +371,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   buttonLabel: {
-    color: '#ffffff',
+    color: Palette.primaryText,
     fontWeight: '600',
   },
 });

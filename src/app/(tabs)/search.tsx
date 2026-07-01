@@ -114,7 +114,6 @@ export default function SearchScreen() {
             data={results}
             keyExtractor={(item, index) => `${item.barcode}-${index}`}
             contentContainerStyle={styles.listContent}
-            ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
             renderItem={({ item }) => (
               <FoodSearchResult item={item} onPress={() => handlePress(item)} />
             )}
@@ -159,8 +158,5 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.two,
-  },
-  separator: {
-    height: 0,
   },
 });

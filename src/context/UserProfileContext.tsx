@@ -18,10 +18,12 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw) setProfile(JSON.parse(raw));
-      setLoading(false);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((raw) => {
+        if (raw) setProfile(JSON.parse(raw));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   async function updateProfile(partial: Partial<UserProfile>) {

@@ -4,19 +4,13 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, Palette, Spacing } from '@/constants/theme';
 import { useFoodLog } from '@/context/FoodLogContext';
 import { FoodLogEntry } from '@/types/FoodLog';
-
-function localDateStr(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { localDateStr } from '@/utils/food';
 
 interface DailyFoodLogProps {
   listHeader?: React.ReactElement;
-  refreshing: boolean;
-  onRefresh: () => void;
 }
 
 function LogRow({ entry, onDelete }: { entry: FoodLogEntry; onDelete: () => void }) {
@@ -53,7 +47,7 @@ function LogRow({ entry, onDelete }: { entry: FoodLogEntry; onDelete: () => void
   );
 }
 
-export function DailyFoodLog({ listHeader, refreshing, onRefresh }: DailyFoodLogProps) {
+export function DailyFoodLog({ listHeader }: DailyFoodLogProps) {
   const { entries, removeEntry } = useFoodLog();
   const today = localDateStr(Date.now());
   const todayEntries = entries.filter((e) => localDateStr(e.timestamp) === today);
@@ -62,8 +56,6 @@ export function DailyFoodLog({ listHeader, refreshing, onRefresh }: DailyFoodLog
     <FlatList
       data={todayEntries}
       keyExtractor={(item) => item.id}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={
         <ThemedView style={styles.emptyState}>
@@ -108,13 +100,13 @@ const styles = StyleSheet.create({
     marginRight: Spacing.two,
   },
   deleteAction: {
-    backgroundColor: '#e53935',
+    backgroundColor: Palette.danger,
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
   },
   deleteText: {
-    color: '#ffffff',
+    color: Palette.dangerText,
   },
   separator: {
     height: StyleSheet.hairlineWidth,

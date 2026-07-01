@@ -7,7 +7,7 @@ import { ProgressDots } from '@/components/progress-dots';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Palette, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { DiabetesType } from '@/types/UserProfile';
 
@@ -25,7 +25,7 @@ export default function OnboardingDiabetesType() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ProgressDots total={4} current={1} />
+        <ProgressDots total={3} current={0} />
 
         <ThemedView style={styles.content}>
           <ThemedText type="subtitle" style={styles.title}>
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: Spacing.four,
     paddingVertical: Spacing.three,
     alignItems: 'center',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   buttonLabel: {
-    color: '#ffffff',
+    color: Palette.primaryText,
     fontWeight: '600',
   },
 });

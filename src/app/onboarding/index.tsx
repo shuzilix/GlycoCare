@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { copy } from '@/constants/copy';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Palette, Spacing } from '@/constants/theme';
 
 export default function OnboardingWelcome() {
   return (
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: Palette.primary,
     borderRadius: Spacing.four,
     paddingVertical: Spacing.three,
     alignItems: 'center',
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   buttonLabel: {
-    color: '#ffffff',
+    color: Palette.primaryText,
     fontWeight: '600',
   },
 });
