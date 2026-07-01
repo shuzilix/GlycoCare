@@ -5,10 +5,13 @@ const SEARCH_URL = 'https://world.openfoodfacts.org/cgi/search.pl';
 export async function searchFoodByName(query: string): Promise<FoodItem[]> {
   const params = new URLSearchParams({
     search_terms: query,
-    json: 'true',
-    page_size: '10',
-    fields: 'code,product_name,brands,nutriments,serving_size,serving_quantity',
-  });
+    search_simple: '1',
+    action: 'process',
+    json: '1',
+    page_size: '20',
+    lc: 'en',           // language: English
+    countries_tags: 'united-states',  // or remove if you want global but English
+});
 
   const res = await fetch(`${SEARCH_URL}?${params}`);
   if (!res.ok) throw new Error(`Search failed: ${res.status}`);
