@@ -61,5 +61,12 @@ export const Spacing = {
   six: 64,
 } as const;
 
+export const Palette = {
+  primary: '#3c87f7',
+  primaryText: '#ffffff',
+  danger: '#e53935',
+  dangerText: '#ffffff',
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
